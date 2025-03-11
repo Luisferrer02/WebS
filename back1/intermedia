@@ -1,0 +1,6 @@
+register - verificador 6 digitos - dashboard
+contraseña - verificador regex
+password cifrada
+email correcto
+gestionar errores 4xx en el try catch
+error de sercvidor - 5xx entra por el catch

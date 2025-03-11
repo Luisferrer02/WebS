@@ -1,0 +1,115 @@
+@baseUrl = http://localhost:3001
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2NhMjdlNTNmOGI3MDlkMWQyYzMyY2IiLCJpYXQiOjE3NDEzMDE3MzksImV4cCI6MTc0MTM4ODEzOX0.ibTamIFWXEXdQF39p8cUmAWVnoMjQXvLkbbMjxuXz2Y
+//raul: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2NhMjdlNTNmOGI3MDlkMWQyYzMyY2IiLCJpYXQiOjE3NDEzMDE3MzksImV4cCI6MTc0MTM4ODEzOX0.ibTamIFWXEXdQF39p8cUmAWVnoMjQXvLkbbMjxuXz2Y
+//luis? Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2M5ODJmZDYyMWJiNDJiMDE0YjE4N2EiLCJpYXQiOjE3NDEyNTk1MTcsImV4cCI6MTc0MTM0NTkxN30.dhNvQdFb94HQki-65biH90afH_aCoDK60pl4LnJxGJ4
+// LLAMADAS AUTH
+
+POST {{baseUrl}}/api/auth/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Raúl",
+    "age": 21,
+    "email": "raul.ramirez@gmail.com",
+    "password": "123456789"
+}
+
+###
+
+POST {{baseUrl}}/api/auth/login HTTP/1.1
+Content-Type: application/json
+
+ {
+    "email": "raul.ramirez@gmail.com",
+    "password": "123456789"
+ }
+
+###
+
+// LLAMADAS USERS
+
+GET {{baseUrl}}/api/users HTTP/1.1
+Authorization: {{authToken}}
+
+###
+
+GET {{baseUrl}}/api/users/67c982fd621bb42b014b187a HTTP/1.1
+Authorization: {{authToken}}
+
+###
+
+PATCH {{baseUrl}}/api/users/67c6df356fec13ea35809c8a HTTP/1.1
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{  
+    "role": "user"
+}
+
+###
+
+DELETE {{baseUrl}}/api/users/67c6db994a09b97a02664ba6 HTTP/1.1
+Authorization: {{authToken}}
+
+###
+
+// LLAMADAS TRACKS
+
+GET {{baseUrl}}/api/tracks HTTP/1.1
+Authorization: {{authToken}}
+
+###
+
+GET {{baseUrl}}/api/tracks/67c17442743b1bd3858d4e9d HTTP/1.1
+Authorization: {{authToken}}
+
+### 
+
+POST {{baseUrl}}/api/tracks HTTP/1.1
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+    "dato": "basura",
+    "name": "Ric",
+    "album": "Album",
+    "cover": "http://tttt.com",
+    "artist": {
+        "name": "Ric",
+        "nickname": "rsurname",
+        "nationality": "ES"
+    },
+    "duration": {
+        "start": 1,
+        "end": 2
+    },
+    "mediaId": "0123456789abcdef01234567"
+}
+
+###
+
+PUT {{baseUrl}}/api/tracks/67c17442743b1bd3858d4e9d HTTP/1.1
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+    "name": "Nueva cancion",
+    "cover": "http://url.com",
+    "artist": {
+        "name": "Raullll",
+        "nickname": "Raul23135",
+        "nationality": "ES"
+    },
+    "duration": {
+        "start": 1,
+        "end": 20
+    },
+    "mediaId": "0123456789abcdef01234523"
+}
+
+###
+
+DELETE {{baseUrl}}/api/tracks/67c981aa56b4b96d44d80b28 HTTP/1.1
+Authorization: {{authToken}}
+
+###

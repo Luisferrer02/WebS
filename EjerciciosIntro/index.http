@@ -1,0 +1,19 @@
+GET http://localhost:3000/cursos
+//rest client permite hacer peticiones ligeras, no solo get sino post put delete etc
+###
+POST http://localhost:3000/cursos/programacion
+Content-Type: application/json
+
+{
+    "nombre": "Node.js Avanzado"
+}
+
+###
+
+PUT http://localhost:3000/cursos/programacion
+Content-Type: application/json
+
+{
+    "anterior": "JavaScript",
+    "nuevo": "TypeScript"
+}
