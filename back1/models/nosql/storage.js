@@ -1,18 +1,19 @@
 const mongoose = require('mongoose');
 
-const StorageScheme = new mongoose.Schema(
-    {
-        url: {
-            type: String,
-        },
-        filename: {
-            type: String,
-        }
+const StorageSchema = new mongoose.Schema(
+  {
+    originalName: {
+      type: String,
     },
-    {
-        timestamps: true,
-        versionKey: false
+    ipfs: {
+      type: String,
+      required: true
     }
-)
+  },
+  {
+    timestamps: true,
+    versionKey: false
+  }
+);
 
-module.exports = mongoose.model('storages', StorageScheme);
+module.exports = mongoose.model('storages', StorageSchema);
