@@ -1,8 +1,18 @@
+// models/User.js
 const mongoose = require("mongoose");
-const UserScheme = new mongoose.Schema(
+
+const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+    },
+    lastName: {
+      type: String,
+      default: ""
+    },
+    nif: {
+      type: String,
+      default: ""
     },
     age: {
       type: Number,
@@ -12,17 +22,51 @@ const UserScheme = new mongoose.Schema(
       unique: true,
     },
     password: {
-      type: String, // TODO Guardaremos el hash
+      type: String,
     },
     role: {
       type: String,
-      enum: ["user", "admin"], // es el enum de SQL
+      enum: ["user", "admin"],
       default: "user"
     },
+    // Verificación de email:
+    isEmailVerified: {
+      type: Boolean,
+      default: false
+    },
+    emailVerificationCode: {
+      type: String,
+      default: null
+    },
+    emailVerificationAttempts: {
+      type: Number,
+      default: 0
+    },
+    status: {
+      type: String,
+      default: "pending"
+    },
+    // Datos de la compañía:
+    company: {
+      companyName: { type: String, default: "" },
+      cif: { type: String, default: "" },
+      address: { type: String, default: "" }
+    },
+    // Logo del usuario:
+    logo: {
+      type: String,
+      default: ""
+    },
+    // Campo para soft delete:
+    deleted: {
+      type: Boolean,
+      default: false
+    }
   },
   {
-    timestamps: true, // TODO createdAt, updatedAt
+    timestamps: true,
     versionKey: false,
   }
 );
-module.exports = mongoose.model("users", UserScheme); // “users” es el nombre de la colección en mongoDB (o de la tabla en SQL)
+
+module.exports = mongoose.model("User", UserSchema);

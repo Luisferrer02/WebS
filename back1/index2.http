@@ -1,0 +1,104 @@
+register - verificador 6 digitos - dashboard
+contraseña - verificador regex
+password cifrada
+email correcto
+gestionar errores 4xx en el try catch
+error de sercvidor - 5xx entra por el catch
+
+@baseUrl = http://localhost:3001
+
+### 1. Registro de usuario
+POST {{baseUrl}}/api/auth/register HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Alicia",
+  "age": 25,
+  "email": "alicia@example.com",
+  "password": "Password123"
+}
+
+### 2. Login de usuario
+POST {{baseUrl}}/api/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "alicia@example.com",
+  "password": "Password123"
+}
+
+###
+
+@tokenFromLogin = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2RkOWVhNWNiYWQ0MjVmMTM3NDQ0YzEiLCJpYXQiOjE3NDI1Nzc0MDEsImV4cCI6MTc0MjY2MzgwMX0.JVc_5-ONQFT9NLLD6XH0qN7NUaYuZV76_x2x8lndicA
+@userId = 67dd9ea5cbad425f137444c1
+### 3. Validación de email
+# Nota: Reemplaza "123456" con el código de 6 dígitos que aparezca en la BD para este usuario.
+# Guarda el token obtenido en el paso 2 en la variable {{tokenFromLogin}}
+POST {{baseUrl}}/api/users/validate-email HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{tokenFromLogin}}
+
+{
+  "code": "735409"
+}
+
+### 4. On boarding – Datos personales
+PATCH {{baseUrl}}/api/users/onboarding/personal HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{tokenFromLogin}}
+
+{
+  "name": "Alice Updated",
+  "lastName": "Smith",
+  "nif": "12345678A"
+}
+
+### 5. On boarding – Datos de la compañía
+PATCH {{baseUrl}}/api/users/onboarding/company HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{tokenFromLogin}}
+
+{
+  "companyName": "Acme Corp",
+  "cif": "A12345678",
+  "address": "123 Main Street"
+}
+
+### 6. Actualizar logo
+# Se envía una imagen (logo.png) en formato multipart/form-data.
+PATCH {{baseUrl}}/api/users/logo HTTP/1.1
+Content-Type: multipart/form-data; boundary=Boundary
+Authorization: Bearer {{tokenFromLogin}}
+
+--Boundary
+Content-Disposition: form-data; name="img"; filename="image.jpg"
+Content-Type: image/jpg
+
+< ./image.jpg
+--Boundary--
+
+### 7. Obtener usuario a partir del token
+GET {{baseUrl}}/api/users/me HTTP/1.1
+Authorization: Bearer {{tokenFromLogin}}
+
+### 8. Eliminar usuario (soft delete)
+# El endpoint DELETE se ha implementado para usar el usuario del token.
+DELETE {{baseUrl}}/api/users/me?soft=true HTTP/1.1
+Authorization: Bearer {{tokenFromLogin}}
+
+### 9. Recuperar contraseña (stub)
+POST {{baseUrl}}/api/users/recover-password HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "alice@example.com"
+}
+
+### 10. Invitar a un usuario (stub)
+POST {{baseUrl}}/api/users/invite HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{tokenFromLogin}}
+
+{
+  "email": "bob@example.com"
+}

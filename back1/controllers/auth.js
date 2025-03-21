@@ -4,31 +4,61 @@ const { encrypt, compare } = require("../utils/handlePassword")
 const {handleHttpError} = require("../utils/handleError")
 const {usersModel} = require("../models")
 
-/**
- * Encargado de registrar un nuevo usuario
- * @param {*} req 
- * @param {*} res 
- */
 const registerCtrl = async (req, res) => {
     try {
-        req = matchedData(req)
-        const password = await encrypt(req.password)
-        const body = {...req, password} // Con "..." duplicamos el objeto y le añadimos o sobreescribimos una propiedad
-        const dataUser = await usersModel.create(body)
-        //Si no queremos que se devuelva el hash con "findOne", en el modelo de users ponemos select: false en el campo password
-        //Además, en este caso con "create", debemos setear la propiedad tal que:  
-        dataUser.set('password', undefined, { strict: false })
-
-        const data = {
-            token: await tokenSign(dataUser),
-            user: dataUser
+      // 1) Obtenemos los datos validados
+      req = matchedData(req);
+  
+      // 2) Verificar si ya existe un usuario con ese email
+      const existingUser = await usersModel.findOne({ email: req.email });
+      if (existingUser) {
+        return handleHttpError(res, "EMAIL_ALREADY_EXISTS", 409);
+      }
+  
+      // 3) Cifrar la contraseña
+      const passwordHash = await encrypt(req.password);
+  
+      // 4) Generar un código aleatorio de 6 dígitos
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
+      // 5) Construir objeto para la creación
+      const body = {
+        ...req,
+        password: passwordHash,
+        isEmailVerified: false,
+        emailVerificationCode: verificationCode,
+        emailVerificationAttempts: 0,
+        status: "pending"
+      };
+  
+      // 6) Crear el usuario en la BD
+      const dataUser = await usersModel.create(body);
+  
+      // 7) No devolver password en la respuesta
+      dataUser.set('password', undefined, { strict: false });
+  
+      // 8) Generar el token
+      const token = await tokenSign(dataUser);
+  
+      // 9) Responder con los datos del usuario y el token
+      const data = {
+        token,
+        user: {
+          _id: dataUser._id,
+          email: dataUser.email,
+          role: dataUser.role,
+          isEmailVerified: dataUser.isEmailVerified,
+          status: dataUser.status
         }
-        res.send(data)  
-    }catch(err) {
-        console.log(err)
-        handleHttpError(res, "ERROR_REGISTER_USER")
+      };
+  
+      res.send(data);
+    } catch (err) {
+      console.log(err);
+      handleHttpError(res, "ERROR_REGISTER_USER");
     }
-}
+  };
+  
 
 
 /**

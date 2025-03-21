@@ -2,11 +2,17 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const dbConnect = require('./config/mongo');
-
+const { sequelize, dbConnectMySql } = require("./config/mysql")
 const app = express();
 
 // Connect to the database
-dbConnect();
+if (process.env.ENGINE_DB !== 'mysql'){
+    dbConnect()
+    // Crea las colecciones por defecto si no existieran
+    }else{
+    dbConnectMySql()
+    sequelize.sync() // Crea las tablas en la base de datos si no existieran
+    }
 
 // Use CORS to avoid Cross-Domain errors
 app.use(cors());

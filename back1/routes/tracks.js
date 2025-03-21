@@ -5,7 +5,7 @@ const { validatorCreateItem, validatorGetItem, validatorUpdateItem } = require("
 const authMiddleware = require("../middleware/session")
 const checkRol = require("../middleware/rol")
 
-router.get("/", authMiddleware, checkRol(['user']), getItems)
+router.get("/", authMiddleware, checkRol(['user', 'admin']), getItems)
 router.post("/", validatorCreateItem, authMiddleware, createItem)
 router.get("/:id", validatorGetItem, authMiddleware, checkRol(['admin']), getItem)
 router.put("/:id", validatorUpdateItem, authMiddleware, checkRol(['admin']), updateItem)
