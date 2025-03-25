@@ -1,5 +1,5 @@
-const express = require("express")
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 const { 
   getUsers, 
   getUser, 
@@ -13,24 +13,28 @@ const {
   getUserByTokenCtrl,
   recoverPasswordCtrl,
   inviteUserCtrl
-} = require("../controllers/users")
-const { validatorUpdateUser, validatorGetUser } = require("../validators/users")
-const authMiddleware = require("../middleware/session")
-const checkRol = require("../middleware/rol")
+} = require("../controllers/users");
+const { validatorUpdateUser, validatorGetUser } = require("../validators/users");
+const { validatorOnboardingCompany, validatorOnboardingUser } = require("../validators/onboarding");
+const authMiddleware = require("../middleware/session");
+const checkRol = require("../middleware/rol");
+const { uploadMiddleWareMemory } = require("../utils/handleStorage");
 
-router.get("/", authMiddleware, getUsers)
-router.get("/:id", authMiddleware, validatorGetUser, getUser)
-router.patch("/:id", authMiddleware, checkRol(['admin']), validatorUpdateUser, updateUser)
-router.delete("/:id", authMiddleware, checkRol(['admin']), validatorGetUser, deleteUser)
-router.patch("/role/:id", authMiddleware, checkRol(['admin']), updateUserRoleCtrl)
+router.get("/me", authMiddleware, getUserByTokenCtrl);
+router.delete("/me", authMiddleware, deleteUser);
+router.patch("/logo", authMiddleware, uploadMiddleWareMemory.single("image"), updateLogoCtrl);
 
-// Nuevos endpoints:
-router.post("/validate-email", authMiddleware, validateEmailCtrl)
-router.patch("/onboarding/personal", authMiddleware, onboardingPersonalCtrl)
-router.patch("/onboarding/company", authMiddleware, onboardingCompanyCtrl)
-router.patch("/logo", authMiddleware, updateLogoCtrl)
-router.get("/me", authMiddleware, getUserByTokenCtrl)
-router.post("/recover-password", recoverPasswordCtrl)
-router.post("/invite", authMiddleware, inviteUserCtrl)
+router.get("/", authMiddleware, getUsers);
+router.get("/:id", authMiddleware, validatorGetUser, getUser);
+router.patch("/:id", authMiddleware, checkRol(["admin"]), validatorUpdateUser, updateUser);
+router.delete("/:id", authMiddleware, checkRol(["admin"]), validatorGetUser, deleteUser);
+router.patch("/role/:id", authMiddleware, checkRol(["admin"]), updateUserRoleCtrl);
 
-module.exports = router
+// Endpoints nuevos:
+router.post("/validate-email", authMiddleware, validateEmailCtrl);
+router.patch("/onboarding/personal", authMiddleware, validatorOnboardingUser, onboardingPersonalCtrl);
+router.patch("/onboarding/company", authMiddleware, validatorOnboardingCompany, onboardingCompanyCtrl);
+router.post("/recover-password", recoverPasswordCtrl);
+router.post("/invite", authMiddleware, inviteUserCtrl);
+
+module.exports = router;

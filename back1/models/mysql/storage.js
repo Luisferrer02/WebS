@@ -1,3 +1,5 @@
+//models/mysql/storage.js
+
 const { sequelize } = require("../../config/mysql")
 const { DataTypes } = require("sequelize")
 

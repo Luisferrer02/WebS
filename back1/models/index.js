@@ -1,3 +1,5 @@
+//models/index.js
+
 const pathModels = process.env.ENGINE_DB === "nosql" ? "./nosql/" : "./mysql/";
 const models = {
   usersModel: require(pathModels + "users"),
