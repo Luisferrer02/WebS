@@ -42,3 +42,5 @@ morganBody(app, {
   stream: loggerStream,
 });
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
+module.exports = app
