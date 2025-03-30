@@ -6,6 +6,6 @@ const authMiddleware = require("../middleware/session")
 const { send } = require("../controllers/mail")
 const router = express.Router()
 
-router.post("/mail", authMiddleware, validatorMail, send)
+router.post("/", authMiddleware, validatorMail, send)
 
 module.exports = router;

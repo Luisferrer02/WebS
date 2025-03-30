@@ -5,22 +5,22 @@ POST {{baseUrl}}/api/auth/register HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "Alicia",
-  "age": 25,
-  "email": "user@example.com",
+  "name": "Luis",
+  "age": 22,
+  "email": "luis.ferrer@live.u-tad.com",
   "password": "Password123"
 }
 
 ###
-@tokenFromRegister = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2U4NjI3OThiNzdhY2Y1MGJiY2FhZTQiLCJpYXQiOjE3NDMyODI4MDksImV4cCI6MTc0MzM2OTIwOX0.dumCGaTNTbfISoqsxG1-YZBrt8hUn-JOll2WSgI9E9E
+@tokenFromRegister = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2U4ODI5MmU5YmQ2YTdkZmNhNzA0OGUiLCJpYXQiOjE3NDMyOTEwMjYsImV4cCI6MTc0MzM3NzQyNn0.TVMynTfc7Z9UXj9NL0QO7HslxUd6efsz4_wsxKZMcek
 
-### 2. Validación de email (Código de verificación)
+### 2. Validación de email (Registro)
 POST {{baseUrl}}/api/users/validate-email HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{tokenFromRegister}}
 
 {
-  "code": "455085"
+  "code": "884097"
 }
 
 ### 3. Login de usuario
@@ -28,13 +28,13 @@ POST {{baseUrl}}/api/auth/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
+  "email": "luis.ferrer@live.u-tad.com",
   "password": "Password123"
 }
 
 ###
-@tokenFromLogin = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2U4NjI3OThiNzdhY2Y1MGJiY2FhZTQiLCJpYXQiOjE3NDMyODI4OTIsImV4cCI6MTc0MzM2OTI5Mn0.5lD4tCukvCj7de9hG1pccAGSDB_yl0pblMegixSUzrA
-@userId = 67e862798b77acf50bbcaae4
+@tokenFromLogin = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2U4ODI5MmU5YmQ2YTdkZmNhNzA0OGUiLCJpYXQiOjE3NDMyOTExMDgsImV4cCI6MTc0MzM3NzUwOH0.2EEplVo3m_7ds77Vur5sS91Z_P5LXr83JZ0d2LU0Z18
+@userId = 67e88292e9bd6a7dfca7048e
 
 ### 4. On boarding – Datos personales
 PATCH {{baseUrl}}/api/users/onboarding/personal HTTP/1.1
@@ -42,7 +42,7 @@ Content-Type: application/json
 Authorization: Bearer {{tokenFromLogin}}
 
 {
-  "name": "Alice Updated",
+  "name": "Luis Updated",
   "lastName": "Smith",
   "nif": "12345678A"
 }
@@ -70,32 +70,26 @@ Content-Type: image/jpg
 < ./image.jpg
 --Boundary--
 
-### 7. Obtener usuario a partir del token
-GET {{baseUrl}}/api/users/me HTTP/1.1
-Authorization: Bearer {{tokenFromLogin}}
-
-### 8. Eliminar usuario (soft delete)
-DELETE {{baseUrl}}/api/users/me?soft=true HTTP/1.1
-Authorization: Bearer {{tokenFromLogin}}
-
-### 9. Recuperar contraseña (stub) sin cambio de contraseña
-POST {{baseUrl}}/api/users/recover-password HTTP/1.1
+### 7. Recuperar contraseña – Enviar código de recuperación
+POST {{baseUrl}}/api/users/recover-password-code HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "user@example.com"
+  "email": "luis.ferrer@live.u-tad.com",
+  "currentPassword": "Password123"
 }
 
-### 10. Cambio de contraseña (simulado) con nuevo password
-POST {{baseUrl}}/api/users/recover-password HTTP/1.1
+### 8. Cambiar contraseña – Usando el código recibido
+POST {{baseUrl}}/api/users/change-password HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
+  "email": "luis.ferrer@live.u-tad.com",
+  "recoveryCode": "346553",
   "newPassword": "NewPass456"
 }
 
-### 11. Invitar a un usuario
+### 9. Invitación de usuario
 POST {{baseUrl}}/api/users/invite HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{tokenFromLogin}}
@@ -104,7 +98,7 @@ Authorization: Bearer {{tokenFromLogin}}
   "email": "bob@example.com"
 }
 
-### 12. Enviar Email (prueba de mails)
+### 10. Enviar Email (prueba de mails)
 POST {{baseUrl}}/api/mail HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{tokenFromLogin}}

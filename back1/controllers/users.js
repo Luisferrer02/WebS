@@ -1,5 +1,5 @@
 //controllers/users.js
-
+const { encrypt, compare } = require("../utils/handlePassword");
 const { usersModel } = require("../models");
 const { matchedData } = require("express-validator");
 const { handleHttpError } = require("../utils/handleError");
@@ -133,47 +133,6 @@ const recoverPasswordCtrl = async (req, res) => {
   }
 };
 
-
-const inviteUserCtrl = async (req, res) => {
-  try {
-    const inviter = req.user;
-    if (!inviter) {
-      return handleHttpError(res, "USER_NOT_FOUND", 404);
-    }
-    const { email } = matchedData(req);
-
-    let invitedUser = await usersModel.findOne({ email });
-    if (invitedUser) {
-      return handleHttpError(res, "USER_ALREADY_EXISTS", 409);
-    }
-
-    invitedUser = await usersModel.create({
-      email,
-      password: "", // Valor temporal; se gestionará la activación
-      role: "guest",
-      status: "pending"
-    });
-
-    // Enviar email de invitación
-    const emailOptions = {
-      from: process.env.EMAIL,
-      to: email,
-      subject: "Invitación para unirse a la plataforma",
-      text: `Has sido invitado a unirte a la plataforma. Por favor, sigue el enlace para registrarte.`
-    };
-    sendEmail(emailOptions)
-      .then(() => console.log("Email de invitación enviado"))
-      .catch((error) => console.error("Error enviando email de invitación:", error));
-
-    return res.json({
-      message: "Invitación enviada correctamente",
-      invitedUser
-    });
-  } catch (error) {
-    console.error(error);
-    return handleHttpError(res, "ERROR_INVITE_USER");
-  }
-};
 
 const validateEmailCtrl = async (req, res) => {
   try {
@@ -311,6 +270,125 @@ const getUserByTokenCtrl = async (req, res) => {
   }
 };
 
+const recoverPasswordCodeCtrl = async (req, res) => {
+  try {
+    // Se espera { email, currentPassword, from } en el body (el campo "from" es opcional)
+    const { email, currentPassword, from } = matchedData(req);
+    const user = await usersModel.findOne({ email });
+    if (!user) {
+      return handleHttpError(res, "USER_NOT_EXISTS", 404);
+    }
+    // Validar la contraseña actual
+    const validPass = await compare(currentPassword, user.password);
+    if (!validPass) {
+      return handleHttpError(res, "INVALID_PASSWORD", 401);
+    }
+    // Generar código de recuperación de 6 dígitos
+    const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // (Opcionalmente, podrías agregar un contador de intentos)
+    user.passwordRecoveryCode = recoveryCode;
+    await user.save();
+    
+    console.log(`Código de recuperación generado para ${email}: ${recoveryCode}`);
+    
+    // Preparar email. Si se pasa "from" en el body, lo usa; sino usa process.env.EMAIL
+    const emailOptions = {
+      from: from || process.env.EMAIL,
+      to: email,
+      subject: "Código para Cambio de Contraseña",
+      text: `Tu código de recuperación es: ${recoveryCode}`
+    };
+    sendEmail(emailOptions)
+      .then(() => console.log("Email de recuperación enviado"))
+      .catch((error) => console.error("Error enviando email de recuperación:", error));
+
+    return res.json({ message: "Código de recuperación enviado al correo del usuario" });
+  } catch (error) {
+    console.error(error);
+    return handleHttpError(res, "ERROR_RECOVER_PASSWORD");
+  }
+};
+
+const changePasswordCtrl = async (req, res) => {
+  try {
+    // Se espera { email, recoveryCode, newPassword } en el body
+    const { email, recoveryCode, newPassword } = matchedData(req);
+    const user = await usersModel.findOne({ email });
+    if (!user) {
+      return handleHttpError(res, "USER_NOT_EXISTS", 404);
+    }
+    // Comprobar que el código enviado coincide con el guardado
+    if (!user.passwordRecoveryCode || user.passwordRecoveryCode !== recoveryCode) {
+      return handleHttpError(res, "INVALID_RECOVERY_CODE", 400);
+    }
+    // Actualizar la contraseña
+    user.password = await encrypt(newPassword);
+    // Limpiar el código de recuperación
+    user.passwordRecoveryCode = null;
+    await user.save();
+    
+    console.log(`Contraseña actualizada para ${email}`);
+    
+    // Enviar correo de confirmación
+    const emailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Confirmación de Cambio de Contraseña",
+      text: "Tu contraseña se ha actualizado exitosamente."
+    };
+    sendEmail(emailOptions)
+      .then(() => console.log("Email de confirmación enviado"))
+      .catch((error) => console.error("Error enviando email de confirmación:", error));
+      
+    return res.json({ message: "Contraseña actualizada exitosamente" });
+  } catch (error) {
+    console.error(error);
+    return handleHttpError(res, "ERROR_CHANGE_PASSWORD");
+  }
+};
+
+// Modificar la invitación de usuario
+const inviteUserCtrl = async (req, res) => {
+  try {
+    const inviter = req.user;
+    if (!inviter) {
+      return handleHttpError(res, "USER_NOT_FOUND", 404);
+    }
+    const { email } = matchedData(req);
+    let invitedUser = await usersModel.findOne({ email });
+    if (invitedUser) {
+      return handleHttpError(res, "USER_ALREADY_EXISTS", 409);
+    }
+    // Crear usuario invitado con password preliminar "1234"
+    const preliminaryPassword = await encrypt("1234");
+    invitedUser = await usersModel.create({
+      email,
+      password: preliminaryPassword,
+      role: "guest",
+      status: "pending"
+    });
+    
+    // Enviar email de invitación con credenciales
+    const emailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Invitación para unirse a la plataforma",
+      text: `Has sido invitado a unirte a la plataforma.\nCredenciales:\nEmail: ${email}\nPassword: 1234`
+    };
+    sendEmail(emailOptions)
+      .then(() => console.log("Email de invitación enviado"))
+      .catch((error) => console.error("Error enviando email de invitación:", error));
+    
+    return res.json({
+      message: "Invitación enviada correctamente",
+      invitedUser
+    });
+  } catch (error) {
+    console.error(error);
+    return handleHttpError(res, "ERROR_INVITE_USER");
+  }
+};
+
 module.exports = {
   getUsers,
   getUser,
@@ -322,6 +400,8 @@ module.exports = {
   onboardingCompanyCtrl,
   updateLogoCtrl,
   getUserByTokenCtrl,
-  recoverPasswordCtrl,
+  //recoverPasswordCtrl,
   inviteUserCtrl,
+  recoverPasswordCodeCtrl,
+  changePasswordCtrl
 };

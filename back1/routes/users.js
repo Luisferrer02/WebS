@@ -11,10 +11,12 @@ const {
   onboardingCompanyCtrl,
   updateLogoCtrl,
   getUserByTokenCtrl,
-  recoverPasswordCtrl,
+  //recoverPasswordCtrl,
+  recoverPasswordCodeCtrl,
+  changePasswordCtrl,
   inviteUserCtrl
 } = require("../controllers/users");
-const { validatorUpdateUser, validatorGetUser } = require("../validators/users");
+const { validatorUpdateUser, validatorGetUser, validatorRecoverPasswordCode, validatorNewPassword  } = require("../validators/users");
 const { validatorOnboardingCompany, validatorOnboardingUser } = require("../validators/onboarding");
 const authMiddleware = require("../middleware/session");
 const checkRol = require("../middleware/rol");
@@ -34,7 +36,11 @@ router.patch("/role/:id", authMiddleware, checkRol(["admin"]), updateUserRoleCtr
 router.post("/validate-email", authMiddleware, validateEmailCtrl);
 router.patch("/onboarding/personal", authMiddleware, validatorOnboardingUser, onboardingPersonalCtrl);
 router.patch("/onboarding/company", authMiddleware, validatorOnboardingCompany, onboardingCompanyCtrl);
-router.post("/recover-password", recoverPasswordCtrl);
+//router.post("/recover-password", recoverPasswordCtrl);
+router.post("/recover-password-code", validatorRecoverPasswordCode, recoverPasswordCodeCtrl);
+router.post("/change-password", validatorNewPassword, changePasswordCtrl);
+
+// Invitación de usuario
 router.post("/invite", authMiddleware, inviteUserCtrl);
 
 module.exports = router;

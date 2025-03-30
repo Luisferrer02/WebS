@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin", "guest"],
       default: "user"
     },
     // Verificación de email:
@@ -61,7 +61,8 @@ const UserSchema = new mongoose.Schema(
     deleted: {
       type: Boolean,
       default: false
-    }
+    },
+    passwordRecoveryCode: { type: String, default: null }
   },
   {
     timestamps: true,

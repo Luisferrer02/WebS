@@ -52,10 +52,26 @@ const validateEmailCode = [
   }
 ];
 
+// validators/recoverPassword.js
+const validatorRecoverPasswordCode = [
+  check("email").exists().notEmpty().isEmail(),
+  check("currentPassword").exists().notEmpty(),
+  (req, res, next) => validateResults(req, res, next)
+];
+
+const validatorNewPassword = [
+  check("email").exists().notEmpty().isEmail(),
+  check("recoveryCode").exists().notEmpty(),
+  check("newPassword").exists().notEmpty(),
+  (req, res, next) => validateResults(req, res, next)
+];
+
 
 module.exports = {
     validatorGetUser,
     validateRegister,
   validateEmailCode,
-    validatorUpdateUser
+    validatorUpdateUser,
+    validatorRecoverPasswordCode,
+    validatorNewPassword
 }
